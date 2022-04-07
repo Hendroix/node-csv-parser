@@ -1,21 +1,3 @@
-const stats = {
-	oc: {
-		valid: 0,
-		invalid: 0,
-		total: 0
-	},
-	mc: {
-		valid: 0,
-		invalid: 0,
-		total: 0
-	}
-}
-
-const invalidRows = {
-	oc: [],
-	mc: []
-}
-
 const fs = require('fs')
 
 var CSV_PATH = undefined
@@ -28,7 +10,6 @@ process.argv.forEach(function (val, index, array) {
 if(!CSV_PATH){
 	throw new Error('first given param not a .csv file')
 }
-
 
 fs.readFile(CSV_PATH, 'utf-8', (err, data) => {
 	if(err){
@@ -46,13 +27,9 @@ function cleanCSV(data){
 		let rowData = row.replaceAll('"', '').split(',')
 		if(rowData.length === headers.length){
 			let rowObject = createObject(headers, rowData)
-			checkIfBrandIsMatching(rowObject)
+			//rowObject is each row in the csv excluding header.
 		}
 	})
-
-	console.log(stats)
-	createNewCSV(headers, [...invalidRows.oc, ...invalidRows.mc])
-
 }
 
 function createObject(headers, rowData){
@@ -63,26 +40,7 @@ function createObject(headers, rowData){
 	return returnObject
 }
 
-function checkIfBrandIsMatching(row){
-	if(row.Brand__c === 'ONECALL'){
-		stats.oc.total++
-		if(row.account_unique_key__c.startsWith('OC')){
-			stats.oc.valid++
-		}else{
-			invalidRows.oc.push(row)
-			stats.oc.invalid++
-		}
-	} else if(row.Brand__c === 'MYCALL'){
-		stats.mc.total++
-		if(row.account_unique_key__c.startsWith('MC')){
-			stats.mc.valid++
-		}else{
-			invalidRows.mc.push(row)
-			stats.mc.invalid++
-		}
-	}
-}
-
+//Writes given headers and rows to new csv with same name just _cleaned.csv
 function createNewCSV(headers, rows){
 	if(Array.isArray(headers) && Array.isArray(rows)){
 		let newCSVContent = headers.join(',') + '\n'
@@ -104,7 +62,3 @@ function createNewCSV(headers, rows){
 		})
 	}
 }
-
-
-
-
